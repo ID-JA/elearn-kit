@@ -1,6 +1,5 @@
 import { Outlet, redirect } from "react-router";
 import { SignedIn, UserButton } from "@clerk/react-router";
-import { createClerkClient } from "@clerk/react-router/api.server";
 import { getAuth } from "@clerk/react-router/ssr.server";
 import type { Route } from "./+types/portal";
 

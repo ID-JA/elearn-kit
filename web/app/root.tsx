@@ -63,8 +63,8 @@ export default function App({ loaderData }: Route.ComponentProps) {
   return (
     <ClerkProvider
       loaderData={loaderData}
-      signUpFallbackRedirectUrl="/"
-      signInFallbackRedirectUrl="/"
+      signUpFallbackRedirectUrl="/dashboard"
+      signInFallbackRedirectUrl="/dashboard"
     >
       <main>
         <Outlet />
