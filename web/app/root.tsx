@@ -6,12 +6,21 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
+import {
+  ColorSchemeScript,
+  MantineProvider,
+  mantineHtmlProps,
+} from "@mantine/core";
 
+import { rootAuthLoader } from "@clerk/react-router/ssr.server";
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import '@mantine/core/styles.css';
+// import "@mantine/core/styles.css";
+import {
+  ClerkProvider,
+} from "@clerk/react-router";
+import { BackgroundAnimation } from "components/background-animtion";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -26,18 +35,23 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+export async function loader(args: Route.LoaderArgs) {
+  return rootAuthLoader(args);
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  
   return (
-    <html lang="en" {...mantineHtmlProps}>
+    <html lang="en" {...mantineHtmlProps} className="dark">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <ColorSchemeScript />
         <Meta />
         <Links />
       </head>
       <body>
-        <MantineProvider>{children}</MantineProvider>
+      <BackgroundAnimation />
+        {children}
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -45,8 +59,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
-  return <Outlet />;
+export default function App({ loaderData }: Route.ComponentProps) {
+  return (
+    <ClerkProvider
+      loaderData={loaderData}
+      signUpFallbackRedirectUrl="/"
+      signInFallbackRedirectUrl="/"
+    >
+      <main>
+        <Outlet />
+      </main>
+    </ClerkProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
