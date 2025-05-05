@@ -1,10 +1,17 @@
-import splashDarkImg from "../../images/swiss-knife-learning.png";
+import { Link } from "react-router";
+import splashDarkImg from "images/swiss-knife-learning-3d.png";
 export function Welcome() {
   return (
     <main>
       <header className="flex justify-end px-6 py-4">
         <button className="py-1 px-3 bg-red-500 rounded text-white font-medium text-sm">
-          Create an account
+          <Link
+            to={{
+              pathname: "/sign-in",
+            }}
+          >
+            Create an account
+          </Link>
         </button>
       </header>
       <div className="flex flex-col xl:flex-row items-center gap-4 xl:pt-24 xl:justify-center">

@@ -20,7 +20,7 @@ import "./app.css";
 import {
   ClerkProvider,
 } from "@clerk/react-router";
-import { BackgroundAnimation } from "components/background-animtion";
+import { BackgroundAnimation } from "components/background-animation";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
