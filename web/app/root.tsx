@@ -17,9 +17,7 @@ import { rootAuthLoader } from "@clerk/react-router/ssr.server";
 import type { Route } from "./+types/root";
 import "./app.css";
 // import "@mantine/core/styles.css";
-import {
-  ClerkProvider,
-} from "@clerk/react-router";
+import { ClerkProvider } from "@clerk/react-router";
 import { BackgroundAnimation } from "components/background-animation";
 
 export const links: Route.LinksFunction = () => [
@@ -40,7 +38,6 @@ export async function loader(args: Route.LoaderArgs) {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  
   return (
     <html lang="en" {...mantineHtmlProps} className="dark">
       <head>
@@ -50,7 +47,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-      <BackgroundAnimation />
+        <BackgroundAnimation />
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -66,9 +63,9 @@ export default function App({ loaderData }: Route.ComponentProps) {
       signUpFallbackRedirectUrl="/dashboard"
       signInFallbackRedirectUrl="/dashboard"
     >
-      <main>
-        <Outlet />
-      </main>
+        <main>
+          <Outlet />
+        </main>
     </ClerkProvider>
   );
 }

@@ -2,64 +2,91 @@ const { searchSparql } = require("../services/graphdb");
 const express = require("express");
 const router = express.Router();
 
-function buildSearchQuery(keyword, topic) {
+function buildSearchQuery(keyword, topics) {
   let query = `
-    PREFIX lucene: <http://www.ontotext.com/connectors/lucene#>
-    PREFIX luc-index: <http://www.ontotext.com/connectors/lucene/instance#>
-    PREFIX edu: <http://example.org/elearning-onto#>
-    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX lucene: <http://www.ontotext.com/connectors/lucene#>
+  PREFIX luc-index: <http://www.ontotext.com/connectors/lucene/instance#>
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+  PREFIX ex: <http://example.org/elearning-onto#>
+   SELECT DISTINCT ?resource ?title ?description ?difficultyLevel ?duration ?typeLabel ?score WHERE {
+  
+  # Block 1: Filter resources based on a full-text search first for performance.
+  ?search a luc-index:elearnkit_search ;
+          lucene:query "{{KEYWORD}}" ; # <-- User search query
+          lucene:entities ?resource .
+  ?resource lucene:score ?score .
 
-    SELECT ?entity ?title ?score ?typeLabel ?difficultyLevel ?duration ?description WHERE {
-      # Full-text search
-      ?search a luc-index:elearnkit_search ;
-              lucene:query "{{KEYWORD}}" ;      # to be replaced with user input
-              lucene:entities ?entity .
-      ?entity lucene:score ?score .
-
-      OPTIONAL { ?entity edu:title ?title . }
-      OPTIONAL { ?entity edu:description ?description . }
-
-      # Get type label and additional info
-      {
-        ?entity rdf:type edu:Course ;
-                edu:difficultyLevel ?difficultyLevel ;
-                edu:creditHours ?duration .
-        BIND("Course" AS ?typeLabel)
-      } UNION {
-        ?entity rdf:type edu:Module .
-        BIND("Module" AS ?typeLabel)
-      } UNION {
-        ?entity rdf:type edu:Lesson .
-        BIND("Lesson" AS ?typeLabel)
-      }
-
-      # Optional Topic Filter
-      OPTIONAL {
-        ?entity edu:coversConcept ?concept .
-        ?concept edu:relatedTopic <{{TOPIC}}> .  # only apply if user selected a topic
-      }
-    }
-    ORDER BY DESC(?score)  
-  `; // paste template
-
-  query = query.replace('{{KEYWORD}}', keyword);
-
-  if (topic) {
-    query = query.replace('<{{TOPIC}}>', `<${topic}>`);
-  } else {
-    // Remove OPTIONAL block if no topic selected
-    query = query.replace(/OPTIONAL\s*{[^}]*<\{\{TOPIC\}\}>[^}]*}/, '');
+  # Block 2: Further filter the search results by topic.
+  # This pattern is now applied only to the smaller set of text-matched resources.
+  VALUES ?topic {  <<TOPICS>> }
+  ?concept ex:relatedTopic ?topic .
+  ?resource ex:coversConcept ?concept .
+  
+  # Block 3: Get optional metadata for the filtered resources.
+  OPTIONAL { ?resource ex:title ?title . }
+  OPTIONAL { ?resource ex:description ?description . }
+  
+  # Block 4: Determine the type of the resource for a user-friendly label.
+  # This now correctly operates on the generic '?resource' variable.
+  {
+    ?resource rdf:type ex:Course;
+        ex:difficultyLevel ?difficultyLevel ;
+        ex:creditHours ?duration .
+    BIND("Course" AS ?typeLabel)
+  } UNION {
+    ?resource rdf:type ex:Module .
+    BIND("Module" AS ?typeLabel)
+  } UNION {
+    ?resource rdf:type ex:Lesson .
+    BIND("Lesson" AS ?typeLabel)
+  } UNION {
+    ?resource rdf:type ex:Document .
+    BIND("Document" AS ?typeLabel)
   }
+}
+ORDER BY DESC(?score)
+
+  `;
+
+  query = query.replace("{{KEYWORD}}", keyword);
+  console.log({topics})
+  const topicsList = Array.isArray(topics)
+    ? topics.map(t => `<${t}>`).join(" ")
+    : topics ? `<${topics}>` : "";
+  query = query.replace("<<TOPICS>>", topicsList);
 
   return query;
+}
+
+async function keywordsExtractor(query) {
+  const res = await fetch(`http://localhost:5000/extract_keywords`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query }),
+  });
+  const data = await res.json();
+  const keywords = data.keywords.join(" ");
+  return keywords;
 }
 
 const searchCourses = async (req, res) => {
   const query = req.query.q;
 
-  const sparqlQuery =  buildSearchQuery(query, req.query.topic);
+  if (!query) {
+    return res
+      .status(400)
+      .json({ error: "Missing search query parameter 'q'" });
+  }
 
+  const keywords = await keywordsExtractor(query);
+
+  const sparqlQuery = buildSearchQuery(keywords ?? query, req.query.topics.split(","));
   console.log("Generated SPARQL Query:", sparqlQuery);
+  console.log("Keywords extracted:", keywords);
+  console.log("Original query:", query);
   // SELECT ?course ?title ?score ?description {
   //   ?search a luc-index:elearnkit_search ;
   //       lucene:query "${query}" ;
@@ -72,8 +99,9 @@ const searchCourses = async (req, res) => {
 
   // Map each SPARQL binding to a plain JS object
   const results = rawResults.map((binding) => {
+    console.log("Binding:", binding);
     // Base fields
-    const uri = binding.entity.value;
+    const uri = binding.resource.value;
     const title = binding.title?.value ?? null;
     const score = binding.score ? parseFloat(binding.score.value) : null;
     const type = binding.typeLabel?.value ?? null;
@@ -101,7 +129,7 @@ const searchCourses = async (req, res) => {
   return res.json(results);
 };
 
-const getTopics = async (req, res)=>{
+const getTopics = async (req, res) => {
   const sparqlQuery = `
   PREFIX edu: <http://example.org/elearning-onto#>
   PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -110,7 +138,7 @@ const getTopics = async (req, res)=>{
     ?concept edu:relatedTopic ?topic .
     OPTIONAL { ?topic edu:topicName ?label . }
   }  
-  `
+  `;
 
   const rawResults = await searchSparql(sparqlQuery);
 
@@ -122,9 +150,100 @@ const getTopics = async (req, res)=>{
   });
 
   return res.json(topics);
+};
+
+const getConcepts = async (req, res) => {
+  const sparqlQuery = `
+  PREFIX edu: <http://example.org/elearning-onto#>
+
+  SELECT DISTINCT ?concept ?label (GROUP_CONCAT(DISTINCT ?topic; separator=", ") AS ?topics)
+        (GROUP_CONCAT(DISTINCT ?topicLabel; separator=", ") AS ?topicLabels)
+  WHERE {
+    ?concept a edu:Concept .
+    OPTIONAL { ?concept edu:preferredLabel ?label . }
+    OPTIONAL {
+      ?concept edu:relatedTopic ?topic .
+      OPTIONAL { ?topic edu:topicName ?topicLabel . }
+    }
+  }
+  GROUP BY ?concept ?label
+
+  `;
+
+  const rawResults = await searchSparql(sparqlQuery);
+
+  const concepts = rawResults.map((binding) => {
+    return {
+      uri: binding.concept.value,
+      label: binding.label?.value ?? null,
+      topic: binding.topics.value,
+      topicLabel: binding.topicLabels?.value ?? null,
+    };
+  });
+
+  return res.json(concepts);
+}
+
+const getAllCourse = async (req, res)=>{
+  const sparqlQuery = `
+PREFIX edu: <http://example.org/elearning-onto#>
+
+SELECT ?course ?title ?description ?difficultyLevel ?duration ?typeLabel
+       (GROUP_CONCAT(DISTINCT ?conceptLabel; separator=", ") AS ?concepts)
+       (GROUP_CONCAT(DISTINCT ?prereqLabel; separator=", ") AS ?prerequisites)
+       (GROUP_CONCAT(DISTINCT ?requiredConceptLabel; separator=", ") AS ?requiredConcepts)
+
+WHERE {
+  ?course a edu:Course ;
+          edu:title ?title ;
+          edu:description ?description ;
+          edu:difficultyLevel ?difficultyLevel ;
+          # Note: I've renamed ?duration to ?creditHours to match the property
+          edu:creditHours ?creditHours ; 
+          edu:coversConcept ?concept .
+
+  OPTIONAL {
+    ?concept edu:preferredLabel ?conceptLabel .
+  }
+
+  OPTIONAL {
+    ?course edu:hasPrerequisite ?prereq .
+    ?prereq edu:title ?prereqLabel .
+  }
+
+
+  OPTIONAL {
+    ?course edu:requiresConcept ?requiredConcept .
+    ?requiredConcept edu:preferredLabel ?requiredConceptLabel .
+  }
+
+  BIND("Course" AS ?typeLabel)
+}
+
+GROUP BY ?course ?title ?description ?difficultyLevel ?creditHours ?typeLabel ?duration
+  `;
+
+  const rawResults = await searchSparql(sparqlQuery);
+
+  const courses = rawResults.map((binding) => {
+    return {
+      uri: binding.course.value,
+      title: binding.title?.value ?? null,
+      description: binding.description?.value ?? null,
+      difficultyLevel: binding.difficultyLevel?.value ?? null,
+      duration: binding.duration?.value ?? null,
+      concepts: binding.concepts?.value ? binding.concepts.value.split(", ") : [],
+      prerequisites: binding.prerequisites?.value ? binding.prerequisites.value.split(", ") : [],
+      typeLabel: binding.typeLabel?.value ?? "Course",
+      requiredConcepts: binding.requiredConcepts?.value ? binding.requiredConcepts.value.split(", ") : [],
+    };
+  });
+
+  return res.json(courses);
 }
 
 router.get("/search", searchCourses);
 router.get("/topics", getTopics);
-
+router.get("/concepts", getConcepts);
+router.get("/all", getAllCourse);
 module.exports = router;

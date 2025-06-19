@@ -44,12 +44,14 @@ export function meta({}: Route.MetaArgs) {
 // }
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const url = new URL(request.url);
-  const q = url.searchParams.get("q") || ""; // Default to empty string if no query
+  const q = url.searchParams.get("q") || "";
+  const topics = url.searchParams.get("topics") || "";
+  console.log({topics, q});
   if (q.length < 3) {
-    return { resources: [] }; // Return empty array if query is too short
+    return { resources: [] }; 
   }
   const res = await fetch(
-    `http://localhost:3001/api/courses/search?q=${encodeURIComponent(q)}`,
+    `http://localhost:3001/api/courses/search?q=${encodeURIComponent(q)}&topics=${encodeURIComponent(topics)}`,
     {
       headers: {
         "Content-Type": "application/json",

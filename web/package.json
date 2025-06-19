@@ -22,6 +22,8 @@
     "isbot": "^5.1.27",
     "lucide-react": "^0.513.0",
     "react": "^19.1.0",
+    "react-confetti": "^6.4.0",
+    "react-confetti-boom": "^2.0.1",
     "react-dom": "^19.1.0",
     "react-router": "^7.5.3",
     "tailwind-merge": "^3.2.0"

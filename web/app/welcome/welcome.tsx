@@ -14,14 +14,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { useEffect, useState } from "react";
+import { SegmentedControl } from "@mantine/core";
 
 export function Welcome() {
   let fetcher = useFetcher();
-  const { sidebarOpen } = useOutletContext() as {sidebarOpen: boolean};
+  const { sidebarOpen } = useOutletContext() as { sidebarOpen: boolean };
   const resources = fetcher.data?.resources || [];
 
   const [topics, setTopics] = useState([]);
-
   // fetch topics on initial load
   useEffect(() => {
     const fetchTopics = async () => {
@@ -56,16 +56,16 @@ export function Welcome() {
         <img
           src={splashDarkImg}
           className={`${
-        sidebarOpen
-          ? "w-[250px] xl:w-[350px] 2xl:w-[400px]"
-          : "w-[300px] xl:w-[400px] 2xl:w-[500px]"
+            sidebarOpen
+              ? "w-[250px] xl:w-[350px] 2xl:w-[400px]"
+              : "w-[300px] xl:w-[400px] 2xl:w-[500px]"
           } pt-8 xl:pt-0 hidden dark:block`}
           alt="TanStack Logo"
         />
         <div className="flex flex-col items-center gap-6 text-center px-4 xl:text-left xl:items-start">
           <div className="flex gap-2 lg:gap-4 items-center">
-        <h1
-          className={`inline-block
+            <h1
+              className={`inline-block
         font-black 
         ${
           sidebarOpen
@@ -73,54 +73,68 @@ export function Welcome() {
             : "text-5xl md:text-6xl lg:text-8xl"
         }
         `}
-        >
-          <span
-            className={`
+            >
+              <span
+                className={`
         inline-block text-black dark:text-white
         mb-2 uppercase [letter-spacing:-.04em] pr-1.5
         `}
-          >
-            <span className="text-[#77b4e1]">Elearn</span>
-            <span className="text-[#fab538]">Kit</span>
-          </span>
-        </h1>
+              >
+                <span className="text-[#77b4e1]">Elearn</span>
+                <span className="text-[#fab538]">Kit</span>
+              </span>
+            </h1>
           </div>
-        <h2 className={`font-bold ${
-        sidebarOpen
-          ? "text-xl md:text-3xl"
-          : "text-2xl md:text-4xl"
-        } md:max-w-2xl text-balance`}>
-        Smart, personalized learning powered by{" "}
-        <span className="underline decoration-dashed decoration-yellow-500 decoration-3 underline-offset-2">
-          semantic technology.
-        </span>
-        </h2>
-        <p className={`text opacity-90 ${
-        sidebarOpen
-          ? "text-base lg:text-md"
-          : "text-lg lg:text-xl"
-        } lg:max-w-2xl text-balance`}>
-        AI-driven course recommendations, concept-based search, and
-        prerequisite-aware guidance for a truly adaptive learning
-        experience.
-        </p>
+          <h2
+            className={`font-bold ${
+              sidebarOpen ? "text-xl md:text-3xl" : "text-2xl md:text-4xl"
+            } md:max-w-2xl text-balance`}
+          >
+            Smart, personalized learning powered by{" "}
+            <span className="underline decoration-dashed decoration-yellow-500 decoration-3 underline-offset-2">
+              semantic technology.
+            </span>
+          </h2>
+          <p
+            className={`text opacity-90 ${
+              sidebarOpen ? "text-base lg:text-md" : "text-lg lg:text-xl"
+            } lg:max-w-2xl text-balance`}
+          >
+            AI-driven course recommendations, concept-based search, and
+            prerequisite-aware guidance for a truly adaptive learning
+            experience.
+          </p>
         </div>
       </div>
       <div className="container mx-auto mt-8 flex flex-col items-center gap-4">
-        <div className="w-full max-w-3xl">
-          <fetcher.Form method="get" className="flex items-center gap-2" autoComplete="off">
+        <div className="w-full max-w-4xl">
+          <fetcher.Form
+            method="get"
+            className="flex items-center gap-2"
+            autoComplete="off"
+          >
             <Input
               className="h-12"
               name="q"
               startIcon={SearchIcon}
               placeholder="search for resources"
             />
-            <Select defaultValue="all">
-              <SelectTrigger className="w-[180px]  data-[size=default]:h-12">
+          <div className="flex items-center gap-2 ">
+              <Select
+              name="topics"
+              defaultValue={topics.map((topic: any) => topic.uri).join(",")}
+            >
+              <SelectTrigger className="w-[150px] data-[size=default]:h-12">
                 <SelectValue placeholder="Topics " />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Topics</SelectItem>
+                <SelectItem
+                  value={
+                    topics.map((topic: any) => topic.uri).join(",") || "all"
+                  }
+                >
+                  All Topics
+                </SelectItem>
                 {topics.map((topic: any) => (
                   <SelectItem key={topic.uri} value={topic.uri}>
                     {topic.label}
@@ -128,6 +142,21 @@ export function Welcome() {
                 ))}
               </SelectContent>
             </Select>
+            <Select name="resourceType" defaultValue="All Resources">
+              <SelectTrigger className="w-[150px] data-[size=default]:h-12">
+                <SelectValue placeholder="Resource Type " />
+              </SelectTrigger>
+              <SelectContent>
+                {["All Resources", "Course", "Module", "Lesson", "Document", "Video"].map(
+                  (resourceType: any) => (
+                    <SelectItem key={resourceType} value={resourceType}>
+                      {resourceType}
+                    </SelectItem>
+                  )
+                )}
+              </SelectContent>
+            </Select>
+          </div>
           </fetcher.Form>
         </div>
         <p className="text-muted-foreground text-sm text-center">

@@ -8,7 +8,7 @@ const endpoint = "http://localhost:7200";
 const readTimeout = 30000;
 const writeTimeout = 30000;
 const config = new RepositoryClientConfig(endpoint)
-  .setEndpoints(["http://localhost:7200/repositories/doom"])
+  .setEndpoints(["http://localhost:7200/repositories/dama"])
   .setHeaders({
     Accept: RDFMimeType.TURTLE,
   })
