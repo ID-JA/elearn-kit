@@ -257,7 +257,7 @@ The workflow can be broken down into four main stages:
 
 1. **Data Retrieval:** Fetching all required knowledge for a target course from GraphDB.
 2. **User Interaction:** Presenting this information to the user and capturing their input.
-3. **Confidence Calculation: **Processing the user's input to compute a readiness score and identify knowledge gaps.
+3. **Confidence Calculation:** Processing the user's input to compute a readiness score and identify knowledge gaps.
 4. **Result Display:** Showing the user a summary of their readiness with clear, actionable next steps.
 
 
@@ -270,9 +270,3 @@ The workflow can be broken down into four main stages:
     </tr>
   </tbody>
 </table>
-
-
-
-## 📚 License
-
-MIT
