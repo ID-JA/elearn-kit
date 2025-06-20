@@ -7,6 +7,9 @@
 A smart, knowledge-aware web application that enables users to explore and interact with e-learning content using semantic technologies. The platform integrates an ontology-based knowledge graph, full-text semantic search, recommendation features, and prerequisite verification logic.
 
 
+> [!WARNING]  
+> This project is an assignment for my Master's degree program, isn't ready for production use.
+
 
 ## 🚀 Features
 
@@ -90,8 +93,6 @@ You can view the full ontology structure through this [link](https://service.tib
 | `resourceFor`        | Inverse of `hasResource`; points back from a resource to the lesson/module it supports.    |
 
 
----
-
 ## 📁 Project Structure
 
 ```
@@ -103,7 +104,7 @@ project-root/
 |-- README.md
 ```
 
----
+
 
 ## 🚧 Setup Instructions
 
@@ -141,82 +142,136 @@ npm install
 
 ### 3. Start GraphDB Locally
 
-* Download and run [GraphDB Free](https://www.ontotext.com/products/graphdb/)
-* run GraphDB Desktop App than click on **"Open Graph Workbench"**
-* Create a new repository : Go to `Setup > Repositories > Create new repository` 
+- Download and run [GraphDB Free](https://www.ontotext.com/products/graphdb/)
+- run GraphDB Desktop App than click on **"Open Graph Workbench"**
+- Create a new repository : Go to `Setup > Repositories > Create new repository` 
   
   ![image](https://github.com/user-attachments/assets/360f7c88-d217-45c9-870e-442fd65f31ca)
 
-* Load the ontology TTL file into the repo : `Import > Upload RFD files` 
+- Load the ontology TTL file into the repo : `Import > Upload RFD files` 
 
   ![image](https://github.com/user-attachments/assets/03838983-1faa-4836-ac3b-266df14c3c87)
 
+- The ontology is already populated with example data, including courses, concepts, topics, lessons, and resources.
 
-### 4. Configure Lucene Connector
+- To reload or customize the data:
+  - Use the provided Turtle (.ttl) file in the `ontology/` folder, or
+  - Run the SPARQL insert script located in the `scripts/populate/` directory of the repository.
+
+  These scripts handle bulk insertion of courses, concepts, their relationships, and full metadata.
+
+### 4. Configure Reasoning
+Once the ontology and data are loaded, the next step is to enable GraphDB's reasoning capabilities. This process uses the ontology's structure and custom rules to infer new, implicit relationships from the explicit data.
+
+#### 4.1 Add Custom Inference Rules
+We will add the rulesets using a single SPARQL UPDATE query.
+  - Navigate to SPARQL in the GraphDB Workbench.
+  - Copy the entire query below, paste it into the query editor, ensure the Update option is selected, and run it.
+   
+#### 4.2 Apply Rules to Existing Data
+The rules you just added will only apply to new data by default. To apply them to the data you already loaded, **you must trigger a manual re-inference process**. This will delete all existing inferred statements and regenerate them from scratch using the current set of rules.
+  - set our custom rule sets as default:
+  ```sparql
+PREFIX sys: <http://www.ontotext.com/owlim/system#>
+INSERT DATA {
+    _:b sys:defaultRuleset "custom"
+}
+```
+- apply the rules on the exsting data:
+```sparql
+PREFIX sys: <http://www.ontotext.com/owlim/system#>
+
+INSERT DATA {
+  [] sys:reinfer []
+}
+```
+
+### 5. Configure Lucene Connector
 
 * Go to `Plugins > Add Connector > Lucene` in GraphDB and start creating the Lucene configuration
   
+* or use SPARQL this script `scripts/create-lucane-connector.sparql` to automatically create the Lucene Connector
 
-
-* or use the script to 
 
 ### 5. Start Development
 
 ```bash
 # Backend
-cd backend
-npm run start:dev
+cd api
+npm run dev
 
 # Frontend
-cd ../frontend
+cd ../web
 npm run dev
 ```
 
----
 
 ## 🔹 Example SPARQL Query
 
 ### Full-Text + Semantic Filter
 
 ```sparql
-PREFIX lucene: <http://www.ontotext.com/connectors/lucene#>
-PREFIX edu: <http://example.org/elearning-onto#>
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX lucene: <http://www.ontotext.com/connectors/lucene#>
+  PREFIX luc-index: <http://www.ontotext.com/connectors/lucene/instance#>
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+  PREFIX ex: <http://example.org/elearning-onto#>
+   SELECT DISTINCT ?resource ?title ?description ?difficultyLevel ?duration ?typeLabel ?score WHERE {
+  
+  ?search a luc-index:elearnkit_search ;
+          lucene:query "Machine Learning" ;
+          lucene:entities ?resource .
+  ?resource lucene:score ?score .
 
-SELECT ?entity ?title ?score WHERE {
-  ?search a <...lucene_instance> ;
-          lucene:query "machine learning" ;
-          lucene:entities ?entity .
-  ?entity lucene:score ?score ;
-          edu:title ?title .
+  VALUES ?topic {  ex:Topic_ML }
+  ?concept ex:relatedTopic ?topic .
+  ?resource ex:coversConcept ?concept .
+  
+  OPTIONAL { ?resource ex:title ?title . }
+  OPTIONAL { ?resource ex:description ?description . }
+  
+  {
+    ?resource rdf:type ex:Course;
+        ex:difficultyLevel ?difficultyLevel ;
+        ex:creditHours ?duration .
+    BIND("Course" AS ?typeLabel)
+  } UNION {
+    ?resource rdf:type ex:Module .
+    BIND("Module" AS ?typeLabel)
+  } UNION {
+    ?resource rdf:type ex:Lesson .
+    BIND("Lesson" AS ?typeLabel)
+  } UNION {
+    ?resource rdf:type ex:Document .
+    BIND("Document" AS ?typeLabel)
+  }
 }
 ORDER BY DESC(?score)
 ```
 
----
 
 ## ✨ How the Prerequisite Verification Works
+This feature is designed to provide students with immediate, personalized feedback on their readiness for a course.
 
-1. Get course's `requiredConcepts`
-2. Get learner's `hasMasteredConcept`
-3. Match and compute confidence
-4. Return result with progress, missing concepts
+The workflow can be broken down into four main stages:
 
----
+1. **Data Retrieval:** Fetching all required knowledge for a target course from GraphDB.
+2. **User Interaction:** Presenting this information to the user and capturing their input.
+3. **Confidence Calculation: **Processing the user's input to compute a readiness score and identify knowledge gaps.
+4. **Result Display:** Showing the user a summary of their readiness with clear, actionable next steps.
 
-## 📊 Future Improvements
 
-* Personalized recommendations
-* Course progression tracking
-* User authentication
-* Concept learning paths
+## 👨‍💼 Contributors
 
----
+<table>
+  <tbody>
+    <tr>
+      <td align="center"><a href="https://jamalidaissa.vercel.app"><img src="https://avatars.githubusercontent.com/u/69154853?v=4" width="100px;" alt="Jamal Id Aissa"/><br /><sub><b>Jamal Id Aissa</b></sub></a><br /></td>
+    </tr>
+  </tbody>
+</table>
 
-## 👨‍💼 Author
 
-Built with passion for semantic technologies and AI in education by **Jamal**.
-
----
 
 ## 📚 License
 
