@@ -1,0 +1,86 @@
+PREFIX :<http://www.ontotext.com/connectors/lucene#>
+PREFIX inst:<http://www.ontotext.com/connectors/lucene/instance#>
+INSERT DATA {
+	inst:elearnkit_search :createConnector '''
+{
+  "fields": [
+    {
+      "fieldName": "title",
+      "propertyChain": [
+        "http://example.org/elearning-onto#title"
+      ],
+      "indexed": true,
+      "stored": true,
+      "analyzed": true,
+      "multivalued": true,
+      "ignoreInvalidValues": false,
+      "facet": true
+    },
+    {
+      "fieldName": "description",
+      "propertyChain": [
+        "http://example.org/elearning-onto#description"
+      ],
+      "indexed": true,
+      "stored": true,
+      "analyzed": true,
+      "multivalued": true,
+      "ignoreInvalidValues": false,
+      "facet": true
+    },
+    {
+      "fieldName": "preferredLabel",
+      "propertyChain": [
+        "http://example.org/elearning-onto#preferredLabel"
+      ],
+      "indexed": true,
+      "stored": true,
+      "analyzed": true,
+      "multivalued": true,
+      "ignoreInvalidValues": false,
+      "facet": true
+    },
+    {
+      "fieldName": "altLabel",
+      "propertyChain": [
+        "http://example.org/elearning-onto#altLabel"
+      ],
+      "indexed": true,
+      "stored": true,
+      "analyzed": true,
+      "multivalued": true,
+      "ignoreInvalidValues": false,
+      "facet": true
+    },
+    {
+      "fieldName": "topicName",
+      "propertyChain": [
+        "http://example.org/elearning-onto#topicName"
+      ],
+      "indexed": true,
+      "stored": true,
+      "analyzed": true,
+      "multivalued": true,
+      "ignoreInvalidValues": false,
+      "facet": true
+    }
+  ],
+  "languages": [],
+  "types": [
+    "http://example.org/elearning-onto#Course",
+    "http://example.org/elearning-onto#Module",
+    "http://example.org/elearning-onto#Lesson",
+    "http://example.org/elearning-onto#Concept",
+    "http://example.org/elearning-onto#Topic",
+    "http://example.org/elearning-onto#Document",
+    "http://example.org/elearning-onto#Video"
+  ],
+  "readonly": false,
+  "detectFields": false,
+  "importGraph": false,
+  "skipInitialIndexing": false,
+  "boostProperties": [],
+  "stripMarkup": false
+}
+''' .
+}

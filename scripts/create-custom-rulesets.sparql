@@ -1,0 +1,48 @@
+PREFIX sys: <http://www.ontotext.com/owlim/system#>
+PREFIX elearn: <http://example.org/elearning-onto#>
+
+
+INSERT DATA {
+  <_:customRules> sys:addRuleset
+  '''
+    Prefices { elearn: <http://example.org/elearning-onto#> }
+    Axioms {}
+    Rules {
+      # Rule 1: If a course has a module and the module has a lesson,
+      # then the course has that lesson.
+      Id: inferCourseHasLesson
+        course <elearn:hasModule> module
+        module <elearn:hasLesson> lesson
+        -----------------------
+        course <elearn:hasLesson> lesson
+
+      # Rule 2: If a course has a module then that module is part of the course.
+      Id: inferCourseModule
+        course <elearn:hasModule> module
+        -----------------------
+        module <elearn:isModuleOf> course
+
+      # Rule 3: If a module has a lesson, then that lesson is part of the module.
+      Id: inferModuleLesson
+        module <elearn:hasLesson> lesson
+        -----------------------
+        lesson <elearn:isLessonOf> module
+
+      # Rule 4: If a course has a lesson (either directly or inferred by the rule above)
+      # and that lesson covers a concept, then the course covers that concept.
+      Id: inferCourseConcept
+        course <elearn:hasLesson> lesson
+        lesson <elearn:coversConcept> concept
+        -----------------------
+        course <elearn:coversConcept> concept
+
+      # Rule 5: If a course has a prerequisite course, and that prerequisite
+      # covers a concept, then the original course requires that concept.
+      Id: inferCoursePrerequisite
+        courseA <elearn:hasPrerequisite> courseB
+        courseB <elearn:coversConcept> concept
+        -----------------------
+        courseA <elearn:requiresConcept> concept
+    }
+  '''
+}
