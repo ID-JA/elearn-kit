@@ -1,0 +1,697 @@
+@prefix : <http://www.semanticweb.org/aloha/> .
+@prefix ex: <http://www.semanticweb.org/aloha#> .
+@prefix fn: <http://www.w3.org/2005/xpath-functions> .
+@prefix gn: <http://www.geonames.org/ontology#> .
+@prefix so: <http://www.ontotext.com/semantic-object/> .
+@prefix sr: <http://www.openrdf.org/config/repository/sail#> .
+@prefix afn: <http://jena.apache.org/ARQ/function#> .
+@prefix agg: <http://jena.apache.org/ARQ/function/aggregate#> .
+@prefix apf: <http://jena.apache.org/ARQ/property#> .
+@prefix map: <http://www.w3.org/2005/xpath-functions/map> .
+@prefix ofn: <http://www.ontotext.com/sparql/functions/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rep: <http://www.openrdf.org/config/repository#> .
+@prefix sys: <http://www.ontotext.com/owlim/system#> .
+@prefix wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix geof: <http://www.opengis.net/def/function/geosparql/> .
+@prefix list: <http://jena.apache.org/ARQ/list#> .
+@prefix math: <http://www.w3.org/2005/xpath-functions/math> .
+@prefix path: <http://www.ontotext.com/path#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sail: <http://www.openrdf.org/config/sail#> .
+@prefix spif: <http://spinrdf.org/spif#> .
+@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
+@prefix array: <http://www.w3.org/2005/xpath-functions/array> .
+@prefix omgeo: <http://www.ontotext.com/owlim/geo#> .
+@prefix rdf4j: <http://rdf4j.org/schema/rdf4j#> .
+@prefix swrla: <http://swrl.stanford.edu/ontologies/3.3/swrla.owl#> .
+@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
+@prefix elearn: <http://example.org/elearning-onto#> .
+@prefix geoext: <http://rdf.useekm.com/ext#> .
+@prefix prefix: <http://www.ontotext.com/connectors/lucene#> .
+@prefix sesame: <http://www.openrdf.org/schema/sesame#> .
+@prefix graphdb: <http://www.ontotext.com/config/graphdb#> .
+@prefix luc-index: <http://www.ontotext.com/connectors/lucene/instance#> .
+@base <http://www.semanticweb.org/aloha/> .
+
+<http://example.org/elearning-onto> rdf:type owl:Ontology .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://example.org/elearning-onto#difficultyLevel
+elearn:difficultyLevel rdf:type owl:AnnotationProperty .
+
+
+###  http://example.org/elearning-onto#isPartOf
+elearn:isPartOf rdf:type owl:AnnotationProperty .
+
+
+###  http://www.ontotext.com/owlim/system#Ruleset
+sys:Ruleset rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Datatypes
+#################################################################
+
+###  http://www.w3.org/2001/XMLSchema#duration
+xsd:duration rdf:type rdfs:Datatype .
+
+
+###  http://www.w3.org/2001/XMLSchema#string
+xsd:string rdfs:comment "MIME type or general format (e.g., 'video/mp4', 'PDF', 'HTML')." .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://example.org/elearning-onto#assessmentFor
+elearn:assessmentFor rdf:type owl:ObjectProperty ;
+                     owl:inverseOf elearn:hasAssessment .
+
+
+###  http://example.org/elearning-onto#coversConcept
+elearn:coversConcept rdf:type owl:ObjectProperty ;
+                     rdfs:domain elearn:EducationalEntity ;
+                     rdfs:range elearn:Concept ;
+                     rdfs:comment "An entity covers, teaches, or assesses a Concept" .
+
+
+###  http://example.org/elearning-onto#hasAssessment
+elearn:hasAssessment rdf:type owl:ObjectProperty ;
+                     rdfs:domain elearn:Course ,
+                                 elearn:Lesson ,
+                                 elearn:Module ;
+                     rdfs:range elearn:Assessment .
+
+
+###  http://example.org/elearning-onto#hasLesson
+elearn:hasLesson rdf:type owl:ObjectProperty ;
+                 owl:inverseOf elearn:isLessonOf ;
+                 rdfs:domain elearn:Module ;
+                 rdfs:range elearn:Lesson .
+
+
+###  http://example.org/elearning-onto#hasModule
+elearn:hasModule rdf:type owl:ObjectProperty ;
+                 owl:inverseOf elearn:isModuleOf ;
+                 rdfs:domain elearn:Course ;
+                 rdfs:range elearn:Module .
+
+
+###  http://example.org/elearning-onto#hasPrerequisite
+elearn:hasPrerequisite rdf:type owl:ObjectProperty ;
+                       owl:inverseOf elearn:isPrerequisiteFor ;
+                       rdfs:domain elearn:Course ;
+                       rdfs:range elearn:Course .
+
+
+###  http://example.org/elearning-onto#hasResource
+elearn:hasResource rdf:type owl:ObjectProperty ;
+                   owl:inverseOf elearn:resourceFor ;
+                   rdfs:domain elearn:EducationalEntity ;
+                   rdfs:range elearn:Resource ;
+                   rdfs:comment "Educational entity uses or includes a Resource." .
+
+
+###  http://example.org/elearning-onto#isLessonOf
+elearn:isLessonOf rdf:type owl:ObjectProperty ;
+                  rdfs:domain elearn:Lesson ;
+                  rdfs:range elearn:Module .
+
+
+###  http://example.org/elearning-onto#isModuleOf
+elearn:isModuleOf rdf:type owl:ObjectProperty ;
+                  rdfs:domain elearn:Module ;
+                  rdfs:range elearn:Course .
+
+
+###  http://example.org/elearning-onto#isPrerequisiteFor
+elearn:isPrerequisiteFor rdf:type owl:ObjectProperty ;
+                         rdfs:domain elearn:Course ;
+                         rdfs:range elearn:Course .
+
+
+###  http://example.org/elearning-onto#knowledgeSource
+elearn:knowledgeSource rdf:type owl:ObjectProperty ;
+                       rdfs:range elearn:Assessment ;
+                       rdfs:comment "Optional: Evidence or source for the knowledge assertion (e.g., completing a module, passing a test)." .
+
+
+###  http://example.org/elearning-onto#relatedTopic
+elearn:relatedTopic rdf:type owl:ObjectProperty ;
+                    rdfs:domain elearn:Concept ,
+                                elearn:Course ;
+                    rdfs:range elearn:Topic ;
+                    rdfs:comment "Course, Concept are related to a Topic." .
+
+
+###  http://example.org/elearning-onto#requiresConcept
+elearn:requiresConcept rdf:type owl:ObjectProperty ;
+                       rdfs:domain elearn:Course ;
+                       rdfs:range elearn:Concept ;
+                       rdfs:comment "An entity requires prior knowledge of a Concept." .
+
+
+###  http://example.org/elearning-onto#resourceFor
+elearn:resourceFor rdf:type owl:ObjectProperty .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://example.org/elearning-onto#altLabel
+elearn:altLabel rdf:type owl:DatatypeProperty ;
+                rdfs:domain elearn:Concept ;
+                rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#assessmentID
+elearn:assessmentID rdf:type owl:DatatypeProperty ,
+                             owl:FunctionalProperty ;
+                    rdfs:domain elearn:Assessment ;
+                    rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#conceptDefinition
+elearn:conceptDefinition rdf:type owl:DatatypeProperty ;
+                         rdfs:domain elearn:Concept ;
+                         rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#conceptID
+elearn:conceptID rdf:type owl:DatatypeProperty ,
+                          owl:FunctionalProperty ;
+                 rdfs:domain elearn:Concept ;
+                 rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#courseID
+elearn:courseID rdf:type owl:DatatypeProperty ,
+                         owl:FunctionalProperty ;
+                rdfs:domain elearn:Course ;
+                rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#creditHours
+elearn:creditHours rdf:type owl:DatatypeProperty ;
+                   rdfs:domain elearn:Course ;
+                   rdfs:range xsd:decimal .
+
+
+###  http://example.org/elearning-onto#description
+elearn:description rdf:type owl:DatatypeProperty ;
+                   rdfs:domain elearn:Assessment ,
+                               elearn:Course ,
+                               elearn:Lesson ,
+                               elearn:Module ,
+                               elearn:Resource ;
+                   rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#duration
+elearn:duration rdf:type owl:DatatypeProperty ;
+                rdfs:domain elearn:Lesson ;
+                rdfs:range xsd:duration ;
+                rdfs:comment "Estimated time to complete the lesson (e.g., 'PT1H30M' for 1 hour 30 mins)." .
+
+
+###  http://example.org/elearning-onto#format
+elearn:format rdf:type owl:DatatypeProperty ;
+              rdfs:domain elearn:Resource ;
+              rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#lessonID
+elearn:lessonID rdf:type owl:DatatypeProperty ,
+                         owl:FunctionalProperty ;
+                rdfs:domain elearn:Lesson ;
+                rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#moduleID
+elearn:moduleID rdf:type owl:DatatypeProperty ,
+                         owl:FunctionalProperty ;
+                rdfs:domain elearn:Module ;
+                rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#preferredLabel
+elearn:preferredLabel rdf:type owl:DatatypeProperty ;
+                      rdfs:domain elearn:Concept ;
+                      rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#resourceID
+elearn:resourceID rdf:type owl:DatatypeProperty ,
+                           owl:FunctionalProperty ;
+                  rdfs:domain elearn:Resource ;
+                  rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#title
+elearn:title rdf:type owl:DatatypeProperty ;
+             rdfs:domain elearn:Assessment ,
+                         elearn:Course ,
+                         elearn:Lesson ,
+                         elearn:Module ;
+             rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#topicID
+elearn:topicID rdf:type owl:DatatypeProperty ,
+                        owl:FunctionalProperty ;
+               rdfs:domain elearn:Topic ;
+               rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#topicName
+elearn:topicName rdf:type owl:DatatypeProperty ;
+                 rdfs:domain elearn:Topic ;
+                 rdfs:range xsd:string .
+
+
+###  http://example.org/elearning-onto#url
+elearn:url rdf:type owl:DatatypeProperty ;
+           rdfs:domain elearn:Resource ;
+           rdfs:range xsd:anyURI .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://example.org/elearning-onto#Assessment
+elearn:Assessment rdf:type owl:Class ;
+                  rdfs:subClassOf elearn:EducationalEntity .
+
+
+###  http://example.org/elearning-onto#Concept
+elearn:Concept rdf:type owl:Class ;
+               rdfs:comment "A distinct unit of knowledge or skill." .
+
+
+###  http://example.org/elearning-onto#Course
+elearn:Course rdf:type owl:Class ;
+              rdfs:subClassOf elearn:EducationalEntity .
+
+
+###  http://example.org/elearning-onto#Document
+elearn:Document rdf:type owl:Class ;
+                rdfs:subClassOf elearn:Resource ;
+                owl:disjointWith elearn:Video .
+
+
+###  http://example.org/elearning-onto#EducationalEntity
+elearn:EducationalEntity rdf:type owl:Class ;
+                         owl:versionInfo "An abstract class for educational components like courses, modules, lessons, etc." .
+
+
+###  http://example.org/elearning-onto#ExternalLink
+elearn:ExternalLink rdf:type owl:Class ;
+                    rdfs:subClassOf elearn:Resource .
+
+
+###  http://example.org/elearning-onto#Lesson
+elearn:Lesson rdf:type owl:Class ;
+              rdfs:subClassOf elearn:EducationalEntity .
+
+
+###  http://example.org/elearning-onto#Module
+elearn:Module rdf:type owl:Class ;
+              rdfs:subClassOf elearn:EducationalEntity .
+
+
+###  http://example.org/elearning-onto#Resource
+elearn:Resource rdf:type owl:Class .
+
+
+###  http://example.org/elearning-onto#SlideDeck
+elearn:SlideDeck rdf:type owl:Class ;
+                 rdfs:subClassOf elearn:Resource .
+
+
+###  http://example.org/elearning-onto#Topic
+elearn:Topic rdf:type owl:Class ;
+             rdfs:comment "A broader subject area that can encompass multiple concepts" .
+
+
+###  http://example.org/elearning-onto#Video
+elearn:Video rdf:type owl:Class ;
+             rdfs:subClassOf elearn:Resource .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://example.org/elearning-onto#CS101
+elearn:CS101 rdf:type owl:NamedIndividual ,
+                      elearn:Course ;
+             elearn:coversConcept elearn:Concept_ProgFundamentals ;
+             elearn:courseID "CS101" ;
+             elearn:creditHours 3.0 ;
+             elearn:description "Fundamentals of programming using Python." ;
+             elearn:title "Introduction to Programming" ;
+             elearn:difficultyLevel "Beginner" .
+
+
+###  http://example.org/elearning-onto#CS201
+elearn:CS201 rdf:type owl:NamedIndividual ,
+                      elearn:Course ;
+             elearn:coversConcept elearn:Concept_Algorithms ,
+                                  elearn:Concept_DataStructures ;
+             elearn:requiresConcept elearn:Concept_ProgFundamentals ;
+             elearn:courseID "CS201" ;
+             elearn:creditHours 3.0 ;
+             elearn:description "Study of fundamental data structures and algorithm analysis." ;
+             elearn:title "Data Structures and Algorithms" ;
+             elearn:difficultyLevel "Intermediate" .
+
+
+###  http://example.org/elearning-onto#CS305
+elearn:CS305 rdf:type owl:NamedIndividual ,
+                      elearn:Course ;
+             elearn:coversConcept elearn:Concept_Regression ,
+                                  elearn:Concept_SupervisedLearning ,
+                                  elearn:Concept_UnsupervisedLearning ;
+             elearn:hasModule elearn:ML_Module1 ,
+                              elearn:ML_Module2 ;
+             elearn:hasPrerequisite elearn:CS201 ,
+                                    elearn:MA205 ,
+                                    elearn:ST210 ;
+             elearn:courseID "CS305" ;
+             elearn:creditHours 3.0 ;
+             elearn:description "Introduction to machine learning algorithms and concepts." ;
+             elearn:title "Machine Learning" ;
+             elearn:difficultyLevel "Advanced" .
+
+
+###  http://example.org/elearning-onto#Concept_Algorithms
+elearn:Concept_Algorithms rdf:type owl:NamedIndividual ,
+                                   elearn:Concept ;
+                          elearn:relatedTopic elearn:Topic_Programming ;
+                          elearn:conceptID "C002" ;
+                          elearn:preferredLabel "Algorithms" .
+
+
+###  http://example.org/elearning-onto#Concept_Calculus
+elearn:Concept_Calculus rdf:type owl:NamedIndividual ,
+                                 elearn:Concept ;
+                        elearn:relatedTopic elearn:Topic_Maths ;
+                        elearn:altLabel "Differential and Integral Calculus" ;
+                        elearn:conceptID "C004" ;
+                        elearn:preferredLabel "Calculus" .
+
+
+###  http://example.org/elearning-onto#Concept_DataStructures
+elearn:Concept_DataStructures rdf:type owl:NamedIndividual ,
+                                       elearn:Concept ;
+                              elearn:relatedTopic elearn:Topic_Programming ;
+                              elearn:conceptID "C003" ;
+                              elearn:preferredLabel "Data Structures" .
+
+
+###  http://example.org/elearning-onto#Concept_MatrixOps
+elearn:Concept_MatrixOps rdf:type owl:NamedIndividual ,
+                                  elearn:Concept ;
+                         elearn:relatedTopic elearn:Topic_Maths ;
+                         elearn:conceptID "C008" ;
+                         elearn:preferredLabel "Matrix Operations" .
+
+
+###  http://example.org/elearning-onto#Concept_Probability
+elearn:Concept_Probability rdf:type owl:NamedIndividual ,
+                                    elearn:Concept ;
+                           elearn:relatedTopic elearn:Topic_Maths ,
+                                               elearn:Topic_Stats ;
+                           elearn:conceptID "C005" ;
+                           elearn:preferredLabel "Probability Theory" .
+
+
+###  http://example.org/elearning-onto#Concept_ProgFundamentals
+elearn:Concept_ProgFundamentals rdf:type owl:NamedIndividual ,
+                                         elearn:Concept ;
+                                elearn:relatedTopic elearn:Topic_Programming ;
+                                elearn:conceptID "C001" ;
+                                elearn:preferredLabel "Programming Fundamentals" .
+
+
+###  http://example.org/elearning-onto#Concept_Regression
+elearn:Concept_Regression rdf:type owl:NamedIndividual ,
+                                   elearn:Concept ;
+                          elearn:relatedTopic elearn:Topic_ML ,
+                                              elearn:Topic_Stats ;
+                          elearn:conceptID "C011" ;
+                          elearn:preferredLabel "Regression Analysis" .
+
+
+###  http://example.org/elearning-onto#Concept_StatisticalInference
+elearn:Concept_StatisticalInference rdf:type owl:NamedIndividual ,
+                                             elearn:Concept ;
+                                    elearn:relatedTopic elearn:Topic_Stats ;
+                                    elearn:conceptID "C006" ;
+                                    elearn:preferredLabel "Statistical Inference" .
+
+
+###  http://example.org/elearning-onto#Concept_SupervisedLearning
+elearn:Concept_SupervisedLearning rdf:type owl:NamedIndividual ,
+                                           elearn:Concept ;
+                                  elearn:relatedTopic elearn:Topic_ML ,
+                                                      elearn:Topic_Stats ;
+                                  elearn:conceptID "C009" ;
+                                  elearn:preferredLabel "Supervised Learning" .
+
+
+###  http://example.org/elearning-onto#Concept_UnsupervisedLearning
+elearn:Concept_UnsupervisedLearning rdf:type owl:NamedIndividual ,
+                                             elearn:Concept ;
+                                    elearn:relatedTopic elearn:Topic_ML ,
+                                                        elearn:Topic_Stats ;
+                                    elearn:conceptID "C010" ;
+                                    elearn:preferredLabel "Unsupervised Learning" .
+
+
+###  http://example.org/elearning-onto#Concept_VectorSpaces
+elearn:Concept_VectorSpaces rdf:type owl:NamedIndividual ,
+                                     elearn:Concept ;
+                            elearn:relatedTopic elearn:Topic_Maths ;
+                            elearn:conceptID "C007" ;
+                            elearn:preferredLabel "Vector Spaces" .
+
+
+###  http://example.org/elearning-onto#MA101
+elearn:MA101 rdf:type owl:NamedIndividual ,
+                      elearn:Course ;
+             elearn:coversConcept elearn:Concept_Calculus ;
+             elearn:hasModule elearn:MA101_Module1 ,
+                              elearn:MA101_Module2 ;
+             elearn:courseID "MA101" ;
+             elearn:creditHours 4.0 ;
+             elearn:description "Differential and integral calculus." ;
+             elearn:title "Calculus I" ;
+             elearn:difficultyLevel "Beginner" .
+
+
+###  http://example.org/elearning-onto#MA101_Lesson1_1
+elearn:MA101_Lesson1_1 rdf:type owl:NamedIndividual ,
+                                elearn:Lesson ;
+                       elearn:duration "PT45M"^^xsd:duration ;
+                       elearn:lessonID "MA101-M1-L1" ;
+                       elearn:title "Understanding Limits" .
+
+
+###  http://example.org/elearning-onto#MA101_Lesson1_2
+elearn:MA101_Lesson1_2 rdf:type owl:NamedIndividual ,
+                                elearn:Lesson ;
+                       elearn:duration "PT40M"^^xsd:duration ;
+                       elearn:lessonID "MA101-M1-L2" ;
+                       elearn:title "Continuity and Discontinuity" .
+
+
+###  http://example.org/elearning-onto#MA101_Lesson2_1
+elearn:MA101_Lesson2_1 rdf:type owl:NamedIndividual ,
+                                elearn:Lesson ;
+                       elearn:duration "PT1H"^^xsd:duration ;
+                       elearn:lessonID "MA101-M2-L1" ;
+                       elearn:title "Derivatives and Rates of Change" .
+
+
+###  http://example.org/elearning-onto#MA101_Lesson2_2
+elearn:MA101_Lesson2_2 rdf:type owl:NamedIndividual ,
+                                elearn:Lesson ;
+                       elearn:duration "PT50M"^^xsd:duration ;
+                       elearn:lessonID "MA101-M2-L2" ;
+                       elearn:title "Applications of Derivatives" .
+
+
+###  http://example.org/elearning-onto#MA101_Module1
+elearn:MA101_Module1 rdf:type owl:NamedIndividual ,
+                              elearn:Module ;
+                     elearn:coversConcept elearn:Concept_Calculus ;
+                     elearn:hasLesson elearn:MA101_Lesson1_1 ,
+                                      elearn:MA101_Lesson1_2 ;
+                     elearn:description "Introduction to limits, continuity, and basic properties." ;
+                     elearn:moduleID "MA101-M1" ;
+                     elearn:title "Limits and Continuity" .
+
+
+###  http://example.org/elearning-onto#MA101_Module2
+elearn:MA101_Module2 rdf:type owl:NamedIndividual ,
+                              elearn:Module ;
+                     elearn:coversConcept elearn:Concept_Calculus ;
+                     elearn:hasLesson elearn:MA101_Lesson2_1 ,
+                                      elearn:MA101_Lesson2_2 ;
+                     elearn:description "Concepts of derivatives and their applications." ;
+                     elearn:moduleID "MA101-M2" ;
+                     elearn:title "Differentiation" .
+
+
+###  http://example.org/elearning-onto#MA205
+elearn:MA205 rdf:type owl:NamedIndividual ,
+                      elearn:Course ;
+             elearn:coversConcept elearn:Concept_MatrixOps ,
+                                  elearn:Concept_VectorSpaces ;
+             elearn:requiresConcept elearn:Concept_Calculus ;
+             elearn:courseID "MA205" ;
+             elearn:creditHours 3.0 ;
+             elearn:description "Vectors, matrices, and linear transformations." ;
+             elearn:title "Linear Algebra" ;
+             elearn:difficultyLevel "Intermediate" .
+
+
+###  http://example.org/elearning-onto#ML_Doc1
+elearn:ML_Doc1 rdf:type owl:NamedIndividual ,
+                        elearn:Document ,
+                        elearn:Resource ;
+               elearn:coversConcept elearn:Concept_Regression ;
+               elearn:format "application/pdf" ;
+               elearn:resourceID "RES002" ;
+               elearn:title "Linear Regression Explained" ;
+               elearn:url "http://example.org/docs/linear_regression.pdf"^^xsd:anyURI ;
+               elearn:difficultyLevel "Advanced" .
+
+
+###  http://example.org/elearning-onto#ML_Lesson1_1
+elearn:ML_Lesson1_1 rdf:type owl:NamedIndividual ,
+                             elearn:Lesson ;
+                    elearn:hasResource elearn:ML_Video1 ;
+                    elearn:duration "PT30M"^^xsd:duration ;
+                    elearn:lessonID "CS305-M1-L1" ;
+                    elearn:title "What is Machine Learning?" ;
+                    elearn:isPartOf elearn:ML_Module1 .
+
+
+###  http://example.org/elearning-onto#ML_Lesson1_2
+elearn:ML_Lesson1_2 rdf:type owl:NamedIndividual ,
+                             elearn:Lesson ;
+                    elearn:coversConcept elearn:Concept_Regression ;
+                    elearn:hasAssessment elearn:ML_Quiz1 ;
+                    elearn:hasResource elearn:ML_Doc1 ;
+                    elearn:duration "PT1H"^^xsd:duration ;
+                    elearn:lessonID "CS305-M1-L2" ;
+                    elearn:title "Linear Regression" .
+
+
+###  http://example.org/elearning-onto#ML_Lesson2_1
+elearn:ML_Lesson2_1 rdf:type owl:NamedIndividual ,
+                             elearn:Lesson ;
+                    elearn:duration "PT45M"^^xsd:duration ;
+                    elearn:lessonID "CS305-M2-L1" ;
+                    elearn:title "K-Means Clustering" .
+
+
+###  http://example.org/elearning-onto#ML_Module1
+elearn:ML_Module1 rdf:type owl:NamedIndividual ,
+                           elearn:Module ;
+                  elearn:coversConcept elearn:Concept_SupervisedLearning ;
+                  elearn:hasLesson elearn:ML_Lesson1_1 ,
+                                   elearn:ML_Lesson1_2 ;
+                  elearn:description "Overview of ML and common supervised techniques." ;
+                  elearn:moduleID "CS305-M1" ;
+                  elearn:title "Introduction and Supervised Learning" ;
+                  elearn:isPartOf elearn:CS305 .
+
+
+###  http://example.org/elearning-onto#ML_Module2
+elearn:ML_Module2 rdf:type owl:NamedIndividual ,
+                           elearn:Module ;
+                  elearn:coversConcept elearn:Concept_UnsupervisedLearning ;
+                  elearn:hasLesson elearn:ML_Lesson2_1 ;
+                  elearn:description "Clustering and dimensionality reduction." ;
+                  elearn:moduleID "CS305-M2" ;
+                  elearn:title "Unsupervised Learning" .
+
+
+###  http://example.org/elearning-onto#ML_Quiz1
+elearn:ML_Quiz1 rdf:type owl:NamedIndividual ,
+                         elearn:Assessment ;
+                elearn:coversConcept elearn:Concept_Regression ;
+                elearn:assessmentID "CS305-M1-Q1" ;
+                elearn:title "Regression Basics Quiz" ;
+                elearn:difficultyLevel "Advanced" .
+
+
+###  http://example.org/elearning-onto#ML_Video1
+elearn:ML_Video1 rdf:type owl:NamedIndividual ,
+                          elearn:Resource ,
+                          elearn:Video ;
+                 elearn:format "video/mp4" ;
+                 elearn:resourceID "RES001" ;
+                 elearn:title "Intro to ML Concepts" ;
+                 elearn:url "http://example.org/videos/ml_intro.mp4"^^xsd:anyURI ;
+                 elearn:difficultyLevel "Advanced" .
+
+
+###  http://example.org/elearning-onto#ST210
+elearn:ST210 rdf:type owl:NamedIndividual ,
+                      elearn:Course ;
+             elearn:coversConcept elearn:Concept_Probability ,
+                                  elearn:Concept_StatisticalInference ;
+             elearn:requiresConcept elearn:Concept_Calculus ;
+             elearn:courseID "ST210" ;
+             elearn:creditHours 3.0 ;
+             elearn:description "Probability and statistical inference relevant to CS." ;
+             elearn:title "Statistics for Computer Scientists" ;
+             elearn:difficultyLevel "Intermediate" .
+
+
+###  http://example.org/elearning-onto#Topic_ML
+elearn:Topic_ML rdf:type owl:NamedIndividual ,
+                         elearn:Topic ;
+                elearn:topicID "T04" ;
+                elearn:topicName "Machine Learning" .
+
+
+###  http://example.org/elearning-onto#Topic_Maths
+elearn:Topic_Maths rdf:type owl:NamedIndividual ,
+                            elearn:Topic ;
+                   elearn:topicID "T02" ;
+                   elearn:topicName "Mathematics" .
+
+
+###  http://example.org/elearning-onto#Topic_Programming
+elearn:Topic_Programming rdf:type owl:NamedIndividual ,
+                                  elearn:Topic ;
+                         elearn:topicID "T01" ;
+                         elearn:topicName "Programming" .
+
+
+###  http://example.org/elearning-onto#Topic_Stats
+elearn:Topic_Stats rdf:type owl:NamedIndividual ,
+                            elearn:Topic ;
+                   elearn:topicID "T03" ;
+                   elearn:topicName "Statistics" .
+
+
+[ sys:Ruleset "rdfsplus-optimized"
+] .
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

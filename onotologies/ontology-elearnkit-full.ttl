@@ -1,0 +1,551 @@
+@prefix agg: <http://jena.apache.org/ARQ/function/aggregate#> .
+@prefix : <http://www.semanticweb.org/aloha/> .
+@prefix sail: <http://www.openrdf.org/config/sail#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix geof: <http://www.opengis.net/def/function/geosparql/> .
+@prefix elearn: <http://example.org/elearning-onto#> .
+@prefix prefix: <http://www.ontotext.com/connectors/lucene#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix fn: <http://www.w3.org/2005/xpath-functions> .
+@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sys: <http://www.ontotext.com/owlim/system#> .
+@prefix spif: <http://spinrdf.org/spif#> .
+@prefix swrla: <http://swrl.stanford.edu/ontologies/3.3/swrla.owl#> .
+@prefix path: <http://www.ontotext.com/path#> .
+@prefix array: <http://www.w3.org/2005/xpath-functions/array> .
+@prefix apf: <http://jena.apache.org/ARQ/property#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix rep: <http://www.openrdf.org/config/repository#> .
+@prefix so: <http://www.ontotext.com/semantic-object/> .
+@prefix map: <http://www.w3.org/2005/xpath-functions/map> .
+@prefix sr: <http://www.openrdf.org/config/repository/sail#> .
+@prefix rdf4j: <http://rdf4j.org/schema/rdf4j#> .
+@prefix wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix gn: <http://www.geonames.org/ontology#> .
+@prefix afn: <http://jena.apache.org/ARQ/function#> .
+@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
+@prefix luc-index: <http://www.ontotext.com/connectors/lucene/instance#> .
+@prefix list: <http://jena.apache.org/ARQ/list#> .
+@prefix ex: <http://www.semanticweb.org/aloha#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ofn: <http://www.ontotext.com/sparql/functions/> .
+@prefix geoext: <http://rdf.useekm.com/ext#> .
+@prefix graphdb: <http://www.ontotext.com/config/graphdb#> .
+@prefix sesame: <http://www.openrdf.org/schema/sesame#> .
+@prefix math: <http://www.w3.org/2005/xpath-functions/math> .
+@prefix omgeo: <http://www.ontotext.com/owlim/geo#> .
+
+<http://example.org/elearning-onto> a owl:Ontology .
+
+elearn:difficultyLevel a owl:AnnotationProperty .
+
+elearn:isPartOf a owl:AnnotationProperty .
+
+xsd:duration a rdfs:Datatype .
+
+elearn:assertsConcept a owl:ObjectProperty;
+  rdfs:domain elearn:KnowledgeAssertion;
+  rdfs:range elearn:Concept;
+  rdfs:comment "The concept that the knowledge assertion is about." .
+
+elearn:KnowledgeAssertion a owl:Class;
+  rdfs:comment "Represents an assertion about a learner's knowledge of a specific concept, including a level or score." .
+
+elearn:Concept a owl:Class;
+  rdfs:comment "A distinct unit of knowledge or skill." .
+
+elearn:assessmentFor a owl:ObjectProperty;
+  owl:inverseOf elearn:hasAssessment .
+
+elearn:hasAssessment a owl:ObjectProperty;
+  rdfs:domain elearn:Course, elearn:Lesson, elearn:Module;
+  rdfs:range elearn:Assessment .
+
+elearn:containsCourse a owl:ObjectProperty;
+  owl:inverseOf elearn:partOfProgram .
+
+elearn:partOfProgram a owl:ObjectProperty;
+  rdfs:domain elearn:Course;
+  rdfs:range elearn:Program;
+  rdfs:comment "Course is part of a Program." .
+
+elearn:coversConcept a owl:ObjectProperty;
+  rdfs:domain elearn:EducationalEntity;
+  rdfs:range elearn:Concept;
+  rdfs:comment "An entity covers, teaches, or assesses a Concept" .
+
+elearn:EducationalEntity a owl:Class;
+  owl:versionInfo "An abstract class for educational components like courses, modules, lessons, etc." .
+
+elearn:enrolledIn a owl:ObjectProperty;
+  rdfs:domain elearn:Learner;
+  rdfs:range elearn:Course;
+  owl:inverseOf elearn:hasEnrolledLearner;
+  rdfs:comment "Learner is enrolled in a Course." .
+
+elearn:hasEnrolledLearner a owl:ObjectProperty .
+
+elearn:Learner a owl:Class;
+  rdfs:subClassOf elearn:Person .
+
+elearn:Course a owl:Class;
+  rdfs:subClassOf elearn:EducationalEntity .
+
+elearn:Lesson a owl:Class;
+  rdfs:subClassOf elearn:EducationalEntity .
+
+elearn:Module a owl:Class;
+  rdfs:subClassOf elearn:EducationalEntity .
+
+elearn:Assessment a owl:Class;
+  rdfs:subClassOf elearn:EducationalEntity .
+
+elearn:hasKnowledgeAssertion a owl:ObjectProperty;
+  rdfs:domain elearn:LearnerProfile;
+  rdfs:range elearn:KnowledgeAssertion;
+  rdfs:comment "Learner profile contains specific assertions about knowledge." .
+
+elearn:LearnerProfile a owl:Class;
+  rdfs:comment "Represents the profile of a learner, including their knowledge assertions." .
+
+elearn:hasLesson a owl:ObjectProperty;
+  rdfs:domain elearn:Module;
+  rdfs:range elearn:Lesson;
+  owl:inverseOf elearn:isLessonOf .
+
+elearn:hasModule a owl:ObjectProperty;
+  rdfs:domain elearn:Course;
+  rdfs:range elearn:Module;
+  owl:inverseOf elearn:isModuleOf .
+
+elearn:isModuleOf a owl:ObjectProperty;
+  rdfs:domain elearn:Module;
+  rdfs:range elearn:Course .
+
+elearn:hasOutcome a owl:ObjectProperty;
+  rdfs:domain elearn:Course, elearn:Lesson, elearn:Module, elearn:Program;
+  rdfs:range elearn:LearningOutcome;
+  owl:inverseOf elearn:outcomeOf;
+  rdfs:comment "An educational entity aims to achieve a LearningOutcome." .
+
+elearn:outcomeOf a owl:ObjectProperty .
+
+elearn:Program a owl:Class;
+  rdfs:subClassOf elearn:EducationalEntity;
+  owl:versionInfo "comment \"A collection of courses leading to a degree or certification." .
+
+elearn:LearningOutcome a owl:Class;
+  rdfs:comment "A statement describing what a learner should know or be able to do after completing an educational activity." .
+
+elearn:hasProfile a owl:ObjectProperty;
+  rdfs:domain elearn:Learner;
+  rdfs:range elearn:LearnerProfile;
+  owl:inverseOf elearn:profileOf;
+  rdfs:comment "Learner has a LearnerProfile." .
+
+elearn:profileOf a owl:ObjectProperty .
+
+elearn:hasResource a owl:ObjectProperty;
+  rdfs:subPropertyOf owl:topObjectProperty;
+  rdfs:domain elearn:EducationalEntity;
+  rdfs:range elearn:Resource;
+  owl:inverseOf elearn:resourceFor;
+  rdfs:comment "Educational entity uses or includes a Resource." .
+
+elearn:resourceFor a owl:ObjectProperty .
+
+elearn:Resource a owl:Class .
+
+elearn:isLessonOf a owl:ObjectProperty;
+  rdfs:subPropertyOf owl:topObjectProperty;
+  rdfs:domain elearn:Lesson;
+  rdfs:range elearn:Module .
+
+elearn:isPrerequisiteFor a owl:ObjectProperty;
+  rdfs:domain elearn:Course;
+  rdfs:range elearn:Course .
+
+elearn:isTaughtBy a owl:ObjectProperty;
+  rdfs:subPropertyOf owl:topObjectProperty;
+  owl:inverseOf elearn:teaches .
+
+elearn:teaches a owl:ObjectProperty;
+  rdfs:domain elearn:Instructor;
+  rdfs:range elearn:Course;
+  rdfs:comment "Instructor teaches a Course." .
+
+elearn:knowledgeSource a owl:ObjectProperty;
+  rdfs:domain elearn:KnowledgeAssertion;
+  rdfs:range elearn:Assessment;
+  rdfs:comment "Optional: Evidence or source for the knowledge assertion (e.g., completing a module, passing a test)." .
+
+elearn:relatedTopic a owl:ObjectProperty;
+  rdfs:domain elearn:Course, elearn:Topic;
+  rdfs:range elearn:Concept;
+  rdfs:comment "Course, Concept are related to a Topic." .
+
+elearn:Topic a owl:Class;
+  rdfs:comment "A broader subject area that can encompass multiple concepts" .
+
+elearn:requiresConcept a owl:ObjectProperty;
+  rdfs:domain elearn:Course;
+  rdfs:range elearn:Concept;
+  rdfs:comment "An entity requires prior knowledge of a Concept." .
+
+elearn:Instructor a owl:Class;
+  rdfs:subClassOf elearn:Person;
+  owl:disjointWith elearn:Learner .
+
+elearn:altLabel a owl:DatatypeProperty;
+  rdfs:domain elearn:Concept;
+  rdfs:range xsd:string .
+
+elearn:assertionTimestamp a owl:DatatypeProperty;
+  rdfs:domain elearn:KnowledgeAssertion;
+  rdfs:range xsd:dateTime;
+  rdfs:comment "When the knowledge level was asserted or last updated." .
+
+elearn:assessmentID a owl:DatatypeProperty, owl:FunctionalProperty;
+  rdfs:domain elearn:Assessment;
+  rdfs:range xsd:string .
+
+elearn:conceptDefinition a owl:DatatypeProperty;
+  rdfs:domain elearn:Concept;
+  rdfs:range xsd:string .
+
+elearn:conceptID a owl:DatatypeProperty, owl:FunctionalProperty;
+  rdfs:domain elearn:Concept;
+  rdfs:range xsd:string .
+
+elearn:courseID a owl:DatatypeProperty, owl:FunctionalProperty;
+  rdfs:domain elearn:Course;
+  rdfs:range xsd:string .
+
+elearn:creditHours a owl:DatatypeProperty;
+  rdfs:domain elearn:Course;
+  rdfs:range xsd:decimal .
+
+elearn:description a owl:DatatypeProperty;
+  rdfs:domain elearn:Course, elearn:Lesson, elearn:Module, elearn:Assessment, elearn:Resource;
+  rdfs:range xsd:string .
+
+elearn:dueDate a owl:DatatypeProperty;
+  rdfs:domain elearn:Assessment;
+  rdfs:range xsd:dateTime .
+
+elearn:duration a owl:DatatypeProperty;
+  rdfs:domain elearn:Lesson;
+  rdfs:range xsd:duration;
+  rdfs:comment "Estimated time to complete the lesson (e.g., 'PT1H30M' for 1 hour 30 mins)." .
+
+elearn:format a owl:DatatypeProperty;
+  rdfs:domain elearn:Resource;
+  rdfs:range xsd:string .
+
+elearn:knowledgeLevel a owl:DatatypeProperty;
+  rdfs:domain elearn:KnowledgeAssertion;
+  rdfs:range xsd:decimal;
+  rdfs:comment "Confidence level, score, or proficiency (e.g., 0.0-1.0 scale) for the asserted knowledge." .
+
+elearn:learningOutcomeID a owl:DatatypeProperty, owl:FunctionalProperty;
+  rdfs:domain elearn:LearningOutcome;
+  rdfs:range xsd:string .
+
+elearn:lessonID a owl:DatatypeProperty, owl:FunctionalProperty;
+  rdfs:domain elearn:Lesson;
+  rdfs:range xsd:string .
+
+elearn:maxScore a owl:DatatypeProperty;
+  rdfs:domain elearn:Assessment;
+  rdfs:range xsd:integer .
+
+elearn:moduleID a owl:DatatypeProperty, owl:FunctionalProperty;
+  rdfs:domain elearn:Module;
+  rdfs:range xsd:string .
+
+elearn:outcomeDescription a owl:DatatypeProperty;
+  rdfs:domain elearn:LearningOutcome;
+  rdfs:range xsd:string .
+
+elearn:personID a owl:DatatypeProperty, owl:FunctionalProperty;
+  rdfs:domain elearn:Learner, elearn:Instructor;
+  rdfs:range xsd:string .
+
+elearn:preferredLabel a owl:DatatypeProperty;
+  rdfs:domain elearn:Concept;
+  rdfs:range xsd:string .
+
+elearn:programDescription a owl:DatatypeProperty;
+  rdfs:domain elearn:Program;
+  rdfs:range xsd:string .
+
+elearn:programID a owl:DatatypeProperty, owl:FunctionalProperty;
+  rdfs:domain elearn:Program;
+  rdfs:range xsd:string .
+
+elearn:programTitle a owl:DatatypeProperty;
+  rdfs:domain elearn:Program;
+  rdfs:range xsd:string .
+
+elearn:resourceID a owl:DatatypeProperty, owl:FunctionalProperty;
+  rdfs:domain elearn:Resource;
+  rdfs:range xsd:string .
+
+elearn:title a owl:DatatypeProperty;
+  rdfs:domain elearn:Course, elearn:Lesson, elearn:Module, elearn:Assessment, elearn:Resource;
+  rdfs:range xsd:string .
+
+elearn:topicID a owl:DatatypeProperty, owl:FunctionalProperty;
+  rdfs:domain elearn:Topic;
+  rdfs:range xsd:string .
+
+elearn:topicName a owl:DatatypeProperty;
+  rdfs:domain elearn:Topic;
+  rdfs:range xsd:string .
+
+elearn:url a owl:DatatypeProperty;
+  rdfs:domain elearn:Resource;
+  rdfs:range xsd:anyURI .
+
+elearn:Document a owl:Class;
+  rdfs:subClassOf elearn:Resource;
+  owl:disjointWith elearn:Video .
+
+elearn:Video a owl:Class;
+  rdfs:subClassOf elearn:Resource .
+
+elearn:ExternalLink a owl:Class;
+  rdfs:subClassOf elearn:Resource .
+
+elearn:Person a owl:Class .
+
+elearn:SlideDeck a owl:Class;
+  rdfs:subClassOf elearn:Resource .
+
+elearn:CS101 a owl:NamedIndividual, elearn:Course;
+  elearn:difficultyLevel "Beginner";
+  elearn:coversConcept elearn:Concept_ProgFundamentals;
+  elearn:courseID "CS101";
+  elearn:creditHours 3.0;
+  elearn:description "Fundamentals of programming using Python.";
+  elearn:title "Introduction to Programming" .
+
+elearn:Concept_ProgFundamentals a owl:NamedIndividual, elearn:Concept;
+  elearn:relatedTopic elearn:Topic_Programming;
+  elearn:conceptID "C001";
+  elearn:preferredLabel "Programming Fundamentals" .
+
+elearn:CS201 a owl:NamedIndividual, elearn:Course;
+  elearn:difficultyLevel "Intermediate";
+  elearn:coversConcept elearn:Concept_Algorithms, elearn:Concept_DataStructures;
+  elearn:requiresConcept elearn:Concept_ProgFundamentals;
+  elearn:courseID "CS201";
+  elearn:creditHours 3.0;
+  elearn:description "Study of fundamental data structures and algorithm analysis.";
+  elearn:title "Data Structures and Algorithms" .
+
+elearn:Concept_Algorithms a owl:NamedIndividual, elearn:Concept;
+  elearn:relatedTopic elearn:Topic_Programming;
+  elearn:conceptID "C002";
+  elearn:preferredLabel "Algorithms" .
+
+elearn:Concept_DataStructures a owl:NamedIndividual, elearn:Concept;
+  elearn:relatedTopic elearn:Topic_Programming;
+  elearn:conceptID "C003";
+  elearn:preferredLabel "Data Structures" .
+
+elearn:CS305 a owl:NamedIndividual, elearn:Course;
+  elearn:difficultyLevel "Advanced";
+  elearn:coversConcept elearn:Concept_Regression, elearn:Concept_SupervisedLearning,
+    elearn:Concept_UnsupervisedLearning;
+  elearn:hasModule elearn:ML_Module1, elearn:ML_Module2;
+  elearn:courseID "CS305";
+  elearn:creditHours 3.0;
+  elearn:description "Introduction to machine learning algorithms and concepts.";
+  elearn:title "Machine Learning";
+  elearn:hasPrerequisite elearn:CS201, elearn:MA205, elearn:ST210 .
+
+elearn:Concept_Regression a owl:NamedIndividual, elearn:Concept;
+  elearn:relatedTopic elearn:Topic_Stats, elearn:Topic_ML;
+  elearn:conceptID "C011";
+  elearn:preferredLabel "Regression Analysis" .
+
+elearn:Concept_SupervisedLearning a owl:NamedIndividual, elearn:Concept;
+  elearn:relatedTopic elearn:Topic_Stats, elearn:Topic_ML;
+  elearn:conceptID "C009";
+  elearn:preferredLabel "Supervised Learning" .
+
+elearn:Concept_UnsupervisedLearning a owl:NamedIndividual, elearn:Concept;
+  elearn:relatedTopic elearn:Topic_Stats, elearn:Topic_ML;
+  elearn:conceptID "C010";
+  elearn:preferredLabel "Unsupervised Learning" .
+
+elearn:ML_Module1 a owl:NamedIndividual, elearn:Module;
+  elearn:isPartOf elearn:CS305;
+  elearn:coversConcept elearn:Concept_SupervisedLearning;
+  elearn:hasLesson elearn:ML_Lesson1_1, elearn:ML_Lesson1_2;
+  elearn:description "Overview of ML and common supervised techniques.";
+  elearn:moduleID "CS305-M1";
+  elearn:title "Introduction and Supervised Learning" .
+
+elearn:ML_Module2 a owl:NamedIndividual, elearn:Module;
+  elearn:coversConcept elearn:Concept_UnsupervisedLearning;
+  elearn:hasLesson elearn:ML_Lesson2_1;
+  elearn:description "Clustering and dimensionality reduction.";
+  elearn:moduleID "CS305-M2";
+  elearn:title "Unsupervised Learning" .
+
+elearn:Concept_MatrixOps a owl:NamedIndividual, elearn:Concept;
+  elearn:relatedTopic elearn:Topic_Maths;
+  elearn:conceptID "C008";
+  elearn:preferredLabel "Matrix Operations" .
+
+elearn:Concept_StatisticalInference a owl:NamedIndividual, elearn:Concept;
+  elearn:relatedTopic elearn:Topic_Stats;
+  elearn:conceptID "C006";
+  elearn:preferredLabel "Statistical Inference" .
+
+elearn:Concept_VectorSpaces a owl:NamedIndividual, elearn:Concept;
+  elearn:relatedTopic elearn:Topic_Maths;
+  elearn:conceptID "C007";
+  elearn:preferredLabel "Vector Spaces" .
+
+elearn:Topic_Programming a owl:NamedIndividual, elearn:Topic;
+  elearn:topicID "T01";
+  elearn:topicName "Programming" .
+
+elearn:Concept_Calculus a owl:NamedIndividual, elearn:Concept;
+  elearn:relatedTopic elearn:Topic_Maths;
+  elearn:altLabel "Differential and Integral Calculus";
+  elearn:conceptID "C004";
+  elearn:preferredLabel "Calculus" .
+
+elearn:Topic_Maths a owl:NamedIndividual, elearn:Topic;
+  elearn:topicID "T02";
+  elearn:topicName "Mathematics" .
+
+elearn:Concept_Probability a owl:NamedIndividual, elearn:Concept;
+  elearn:relatedTopic elearn:Topic_Maths, elearn:Topic_Stats;
+  elearn:conceptID "C005";
+  elearn:preferredLabel "Probability Theory" .
+
+elearn:Topic_Stats a owl:NamedIndividual, elearn:Topic;
+  elearn:topicID "T03";
+  elearn:topicName "Statistics" .
+
+elearn:Topic_ML a owl:NamedIndividual, elearn:Topic;
+  elearn:topicID "T04";
+  elearn:topicName "Machine Learning" .
+
+elearn:MA101 a owl:NamedIndividual, elearn:Course;
+  elearn:difficultyLevel "Beginner";
+  elearn:coversConcept elearn:Concept_Calculus;
+  elearn:hasModule elearn:MA101_Module1, elearn:MA101_Module2;
+  elearn:courseID "MA101";
+  elearn:creditHours 4.0;
+  elearn:description "Differential and integral calculus.";
+  elearn:title "Calculus I" .
+
+elearn:MA205 a owl:NamedIndividual, elearn:Course;
+  elearn:difficultyLevel "Intermediate";
+  elearn:coversConcept elearn:Concept_MatrixOps, elearn:Concept_VectorSpaces;
+  elearn:requiresConcept elearn:Concept_Calculus;
+  elearn:courseID "MA205";
+  elearn:creditHours 3.0;
+  elearn:description "Vectors, matrices, and linear transformations.";
+  elearn:title "Linear Algebra" .
+
+elearn:ML_Doc1 a owl:NamedIndividual, elearn:Resource, elearn:Document;
+  elearn:difficultyLevel "Advanced";
+  elearn:coversConcept elearn:Concept_Regression;
+  elearn:format "application/pdf";
+  elearn:resourceID "RES002";
+  elearn:title "Linear Regression Explained";
+  elearn:url "http://example.org/docs/linear_regression.pdf"^^xsd:anyURI .
+
+elearn:ML_Lesson1_1 a owl:NamedIndividual, elearn:Lesson;
+  elearn:isPartOf elearn:ML_Module1;
+  elearn:hasResource elearn:ML_Video1;
+  elearn:duration "PT30M"^^xsd:duration;
+  elearn:lessonID "CS305-M1-L1";
+  elearn:title "What is Machine Learning?" .
+
+elearn:ML_Video1 a owl:NamedIndividual, elearn:Resource, elearn:Video;
+  elearn:difficultyLevel "Advanced";
+  elearn:format "video/mp4";
+  elearn:resourceID "RES001";
+  elearn:title "Intro to ML Concepts";
+  elearn:url "http://example.org/videos/ml_intro.mp4"^^xsd:anyURI .
+
+elearn:ML_Lesson1_2 a owl:NamedIndividual, elearn:Lesson;
+  elearn:hasAssessment elearn:ML_Quiz1;
+  elearn:coversConcept elearn:Concept_Regression;
+  elearn:hasResource elearn:ML_Doc1;
+  elearn:duration "PT1H"^^xsd:duration;
+  elearn:lessonID "CS305-M1-L2";
+  elearn:title "Linear Regression" .
+
+elearn:ML_Quiz1 a owl:NamedIndividual, elearn:Assessment;
+  elearn:difficultyLevel "Advanced";
+  elearn:coversConcept elearn:Concept_Regression;
+  elearn:assessmentID "CS305-M1-Q1";
+  elearn:maxScore 10;
+  elearn:title "Regression Basics Quiz" .
+
+elearn:ML_Lesson2_1 a owl:NamedIndividual, elearn:Lesson;
+  elearn:duration "PT45M"^^xsd:duration;
+  elearn:lessonID "CS305-M2-L1";
+  elearn:title "K-Means Clustering" .
+
+elearn:ST210 a owl:NamedIndividual, elearn:Course;
+  elearn:difficultyLevel "Intermediate";
+  elearn:coversConcept elearn:Concept_StatisticalInference, elearn:Concept_Probability;
+  elearn:requiresConcept elearn:Concept_Calculus;
+  elearn:courseID "ST210";
+  elearn:creditHours 3.0;
+  elearn:description "Probability and statistical inference relevant to CS.";
+  elearn:title "Statistics for Computer Scientists" .
+
+elearn:hasPrerequisite a owl:ObjectProperty;
+  rdfs:domain elearn:Course;
+  rdfs:range elearn:Course;
+  owl:inverseOf elearn:isPrerequisiteFor .
+
+elearn:MA101_Module1 a elearn:Module;
+  elearn:coversConcept elearn:Concept_Calculus;
+  elearn:hasLesson elearn:MA101_Lesson1_1, elearn:MA101_Lesson1_2;
+  elearn:description "Introduction to limits, continuity, and basic properties.";
+  elearn:moduleID "MA101-M1";
+  elearn:title "Limits and Continuity" .
+
+elearn:MA101_Lesson1_1 a elearn:Lesson;
+  elearn:duration "PT45M"^^xsd:duration;
+  elearn:lessonID "MA101-M1-L1";
+  elearn:title "Understanding Limits" .
+
+elearn:MA101_Lesson1_2 a elearn:Lesson;
+  elearn:duration "PT40M"^^xsd:duration;
+  elearn:lessonID "MA101-M1-L2";
+  elearn:title "Continuity and Discontinuity" .
+
+elearn:MA101_Module2 a elearn:Module;
+  elearn:coversConcept elearn:Concept_Calculus;
+  elearn:hasLesson elearn:MA101_Lesson2_1, elearn:MA101_Lesson2_2;
+  elearn:description "Concepts of derivatives and their applications.";
+  elearn:moduleID "MA101-M2";
+  elearn:title "Differentiation" .
+
+elearn:MA101_Lesson2_1 a elearn:Lesson;
+  elearn:duration "PT1H"^^xsd:duration;
+  elearn:lessonID "MA101-M2-L1";
+  elearn:title "Derivatives and Rates of Change" .
+
+elearn:MA101_Lesson2_2 a elearn:Lesson;
+  elearn:duration "PT50M"^^xsd:duration;
+  elearn:lessonID "MA101-M2-L2";
+  elearn:title "Applications of Derivatives" .
+
+xsd:string rdfs:comment "MIME type or general format (e.g., 'video/mp4', 'PDF', 'HTML')." .
+
+_:genid-6f467148cdea43d59f41c8b33dea888e130291-b sys:Ruleset "rdfsplus-optimized" .
